@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 #include "TestContext.hpp"
+#include "Brake.hpp"
 #include "test.hpp"
 #include <string>
 #include <iostream>
@@ -14,11 +15,13 @@ int main()
 
 void testDrivingState();
 void testEngine();
+void testBrake();
 
 void test()
 {
     testDrivingState();
     testEngine();
+    testBrake();
 }
 
 void testDrivingState()
@@ -43,4 +46,17 @@ void testEngine()
     engine.instanceSpeed(10);
     state = engine.calculate(state, 1);
     TestEqual("加速後の速度チェック", state.speed(), 10.0);
+}
+
+void testBrake()
+{
+    std::cerr << " === Brake" << std::endl;
+
+    Brake brake;
+    DrivingState state(16, 0);
+
+    brake.force(5);
+    state = brake.calculate(state, 2);
+    // v = v0 - (動摩擦係数 * force) * 時間 = 6
+    TestEqual("v == 16 - (1 * 5) * 2 = 6", state.speed(), 6);
 }
