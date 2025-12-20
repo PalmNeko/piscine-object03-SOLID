@@ -1,18 +1,21 @@
 ```mermaid
 
 classDiagram
-
-    Car o-- ICalculator
-    Car o-- Engine
-    Car o-- Brake
-    Car o-- SteerWheel
-
-    Car <.. DrivingState
+    Car *-- DrivingState
+    Car *-- IDrivingStateCalculationFormula
 
     IDrivingStateCalculationFormula <|.. CompositeDrivingStateCalculator
     IDrivingStateCalculationFormula <|.. Brake
     IDrivingStateCalculationFormula <|.. Engine
     IDrivingStateCalculationFormula <|.. SteerWheel
+
+    class Car {
+        -DrivingState state
+        -ICalculator stateCalculator
+        -Engine engine
+        -Brake brake
+        -SteerWheel steerWheel
+    }
 
     class DrivingState {
         double speed
