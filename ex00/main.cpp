@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "Car.hpp"
 #include "CompositeDrivingStateCalculator.hpp"
 #include "SteerWheel.hpp"
 #include "TestContext.hpp"
@@ -20,6 +21,7 @@ void testEngine();
 void testBrake();
 void testSteerWheel();
 void testCompositeDrivingStateCalculator();
+void testCar();
 
 void test()
 {
@@ -28,6 +30,7 @@ void test()
     testBrake();
     testSteerWheel();
     testCompositeDrivingStateCalculator();
+    testCar();
 }
 
 void testDrivingState()
@@ -49,6 +52,7 @@ void testEngine()
     Engine engine;
     DrivingState state;
 
+    engine.power(true);
     engine.instanceSpeed(10);
     state = engine.calculate(state, 1);
     TestEqual("加速後の速度チェック", state.speed(), 10.0);
@@ -88,10 +92,70 @@ void testCompositeDrivingStateCalculator()
     CompositeDrivingStateCalculator compositeDrivingStateCalculator;
     DrivingState state;
 
+    engine1.power(true);
+    engine2.power(true);
     engine1.instanceSpeed(3);
     engine2.instanceSpeed(3);
     compositeDrivingStateCalculator.addFormula(engine1);
     compositeDrivingStateCalculator.addFormula(engine2);
     state = compositeDrivingStateCalculator.calculate(state, 1);
     TestEqual("複数数式", state.speed(), 6);
+}
+
+void testCar()
+{
+    std::cerr << " === Car" << std::endl;
+
+    Engine engine;
+    Brake brake;
+    SteerWheel steerWheel;
+    CompositeDrivingStateCalculator stateCalculator;
+
+    stateCalculator.addFormula(engine);
+    stateCalculator.addFormula(brake);
+    stateCalculator.addFormula(steerWheel);
+
+    Car car(engine, brake, steerWheel);
+    car.update();
+    TestEqual("初期状態 speed", car.state().speed(), 0);
+    TestEqual("初期状態 angle", car.state().angle(), 0);
+
+    car.start();
+    car.accelerate(3);
+    car.update();
+    TestEqual("started accelerate speed", car.state().speed(), 3);
+    TestEqual("started accelerate angle", car.state().angle(), 0);
+
+    car.stop();
+    car.accelerate(3);
+    car.update();
+    TestEqual("stopped accelerate speed", car.state().speed(), 3);
+    TestEqual("stopped accelerate angle", car.state().angle(), 0);
+
+    car.start();
+    car.turn_wheel(10);
+    car.update();
+    TestEqual("1: turn_wheel speed", car.state().speed(), 3);
+    TestEqual("1: turn_wheel angle", car.state().angle(), 10);
+
+    car.update();
+    TestEqual("2: turn_wheel speed", car.state().speed(), 3);
+    TestEqual("2: turn_wheel angle", car.state().angle(), 10);
+
+    car.straighten_wheels();
+    car.update();
+    TestEqual("straighten_wheels speed", car.state().speed(), 3);
+    TestEqual("straighten_wheels angle", car.state().angle(), 0);
+
+    car.accelerate(50);
+    car.update(); // speed 53
+    car.apply_force_on_brakes(2);
+    car.update();
+    TestEqual("apply_force_on_brakes speed", car.state().speed(), 51);
+    TestEqual("apply_force_on_brakes angle", car.state().angle(), 0);
+
+    car.apply_emergency_brakes();
+    car.update();
+    TestEqual("apply_emergency_brakes speed", car.state().speed(), 0);
+    TestEqual("apply_emergency_brakes angle", car.state().angle(), 0);
 }
