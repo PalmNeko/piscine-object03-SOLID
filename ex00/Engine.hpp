@@ -4,10 +4,30 @@
 
 class Engine : public IDrivingStateCalculationFormula
 {
-    double speed_;
+    double instance_speed;
 
 public:
-    double speed() { return speed_; }
+    Engine() : instance_speed(0) {}
+    ~Engine() {}
+    Engine(const Engine &other) : instance_speed(other.instance_speed) {}
 
-    DrivingState calculate(const DrivingState &state, double deltaTime) = 0;
+public:
+    void instanceSpeed(double value) { instance_speed = value; }
+
+    DrivingState calculate(const DrivingState &state, double)
+    {
+        DrivingState newstate(state.speed() + instance_speed, state.angle());
+        instance_speed = 0;
+        return newstate;
+    }
+
+public:
+    Engine &operator=(const Engine &other)
+    {
+        if (this != &other)
+        {
+            instance_speed = other.instance_speed;
+        }
+        return *this;
+    }
 };
