@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "CompositeDrivingStateCalculator.hpp"
 #include "SteerWheel.hpp"
 #include "TestContext.hpp"
 #include "Brake.hpp"
@@ -18,6 +19,7 @@ void testDrivingState();
 void testEngine();
 void testBrake();
 void testSteerWheel();
+void testCompositeDrivingStateCalculator();
 
 void test()
 {
@@ -25,6 +27,7 @@ void test()
     testEngine();
     testBrake();
     testSteerWheel();
+    testCompositeDrivingStateCalculator();
 }
 
 void testDrivingState()
@@ -74,4 +77,21 @@ void testSteerWheel()
     steerWheel.angle(5);
     state = steerWheel.calculate(state, 1);
     TestEqual("車の向きを設定", state.angle(), 5);
+}
+
+void testCompositeDrivingStateCalculator()
+{
+    std::cerr << " === CompositeDrivingStateCalculator" << std::endl;
+
+    Engine engine1;
+    Engine engine2;
+    CompositeDrivingStateCalculator compositeDrivingStateCalculator;
+    DrivingState state;
+
+    engine1.instanceSpeed(3);
+    engine2.instanceSpeed(3);
+    compositeDrivingStateCalculator.addFormula(engine1);
+    compositeDrivingStateCalculator.addFormula(engine2);
+    state = compositeDrivingStateCalculator.calculate(state, 1);
+    TestEqual("複数数式", state.speed(), 6);
 }
