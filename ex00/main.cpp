@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "SteerWheel.hpp"
 #include "TestContext.hpp"
 #include "Brake.hpp"
 #include "test.hpp"
@@ -16,12 +17,14 @@ int main()
 void testDrivingState();
 void testEngine();
 void testBrake();
+void testSteerWheel();
 
 void test()
 {
     testDrivingState();
     testEngine();
     testBrake();
+    testSteerWheel();
 }
 
 void testDrivingState()
@@ -59,4 +62,16 @@ void testBrake()
     state = brake.calculate(state, 2);
     // v = v0 - (動摩擦係数 * force) * 時間 = 6
     TestEqual("v == 16 - (1 * 5) * 2 = 6", state.speed(), 6);
+}
+
+void testSteerWheel()
+{
+    std::cerr << " === SteerWheel" << std::endl;
+
+    SteerWheel steerWheel;
+    DrivingState state;
+
+    steerWheel.angle(5);
+    state = steerWheel.calculate(state, 1);
+    TestEqual("車の向きを設定", state.angle(), 5);
 }
