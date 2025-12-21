@@ -172,7 +172,7 @@ void testCar()
     Transmission transmission;
     Gear gear1(1);
     Gear gear2(2);
-    Gear gearReverse;
+    Gear gearReverse(-1);
 
     transmission.addGear(gear1);
     transmission.addGear(gear2);
@@ -186,37 +186,74 @@ void testCar()
 
     car.start();
     car.accelerate(50);
-    res = car.calculate();
-    TestEqual("started accelerate speed", res.speed(), 50);
-    TestEqual("started accelerate angle", res.angle(), 0);
 
-    car.stop();
-    res = car.calculate();
-    TestEqual("stopped accelerate speed", res.speed(), 0);
-    TestEqual("stopped accelerate angle", res.angle(), 0);
+    {
+        res = car.calculate();
+        TestEqual("started accelerate speed", res.speed(), 50);
+        TestEqual("started accelerate angle", res.angle(), 0);
+    }
 
-    car.start();
-    car.turn_wheel(10);
-    res = car.calculate();
-    TestEqual("1: turn_wheel speed", res.speed(), 50);
-    TestEqual("1: turn_wheel angle", res.angle(), 10);
+    {
+        car.stop();
+        res = car.calculate();
+        TestEqual("stopped accelerate speed", res.speed(), 0);
+        TestEqual("stopped accelerate angle", res.angle(), 0);
+        car.start();
+    }
 
-    res = car.calculate();
-    TestEqual("2: turn_wheel speed", res.speed(), 50);
-    TestEqual("2: turn_wheel angle", res.angle(), 10);
+    {
+        car.shift_gears_up();
+        res = car.calculate();
+        TestEqual("shift_gears_up speed", res.speed(), 100);
+        TestEqual("shift_gears_up angle", res.angle(), 0);
+        car.shift_gears_down();
+    }
 
-    car.straighten_wheels();
-    res = car.calculate();
-    TestEqual("straighten_wheels speed", res.speed(), 50);
-    TestEqual("straighten_wheels angle", res.angle(), 0);
+    {
+        car.shift_gears_up();
+        car.shift_gears_down();
+        res = car.calculate();
+        TestEqual("shift_gears_down speed", res.speed(), 50);
+        TestEqual("shift_gears_down angle", res.angle(), 0);
+    }
 
-    car.apply_force_on_brakes(2);
-    res = car.calculate();
-    TestEqual("apply_force_on_brakes speed", res.speed(), 48);
-    TestEqual("apply_force_on_brakes angle", res.angle(), 0);
+    {
+        car.reverse();
+        res = car.calculate();
+        TestEqual("reverse speed", res.speed(), -50);
+        TestEqual("reverse angle", res.angle(), 0);
+        car.reverse();
+    }
 
-    car.apply_emergency_brakes();
-    res = car.calculate();
-    TestEqual("apply_emergency_brakes speed", res.speed(), 0);
-    TestEqual("apply_emergency_brakes angle", res.angle(), 0);
+    {
+        car.turn_wheel(10);
+        res = car.calculate();
+        TestEqual("turn_wheel speed", res.speed(), 50);
+        TestEqual("turn_wheel angle", res.angle(), 10);
+        car.turn_wheel(0);
+    }
+
+    {
+        car.turn_wheel(100);
+        car.straighten_wheels();
+        res = car.calculate();
+        TestEqual("straighten_wheels speed", res.speed(), 50);
+        TestEqual("straighten_wheels angle", res.angle(), 0);
+    }
+
+    {
+        car.apply_force_on_brakes(2);
+        res = car.calculate();
+        TestEqual("apply_force_on_brakes speed", res.speed(), 48);
+        TestEqual("apply_force_on_brakes angle", res.angle(), 0);
+        car.apply_force_on_brakes(0);
+    }
+
+    {
+        car.apply_emergency_brakes();
+        res = car.calculate();
+        TestEqual("apply_emergency_brakes speed", res.speed(), 0);
+        TestEqual("apply_emergency_brakes angle", res.angle(), 0);
+        car.apply_force_on_brakes(0);
+    }
 }

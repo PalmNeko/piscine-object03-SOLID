@@ -24,12 +24,24 @@ public:
 
     DrivingState calculate(const DrivingState &state, double deltaTime)
     {
-        double a = -friction_ * force_;
-        double newSpeed = state.speed() + a * deltaTime; // v = v0 + at
-        if (newSpeed < 0)
-            newSpeed = 0;
-        DrivingState newstate(newSpeed, state.angle());
-        return newstate;
+        if (state.speed() > 0)
+        {
+            double a = -friction_ * force_;
+            double newSpeed = state.speed() + a * deltaTime; // v = v0 + at
+            if (newSpeed < 0)
+                newSpeed = 0;
+            DrivingState newstate(newSpeed, state.angle());
+            return newstate;
+        }
+        else
+        {
+            double a = friction_ * force_;
+            double newSpeed = state.speed() + a * deltaTime; // v = v0 + at
+            if (newSpeed > 0)
+                newSpeed = 0;
+            DrivingState newstate(newSpeed, state.angle());
+            return newstate;
+        }
     }
 
 public:
