@@ -59,7 +59,7 @@ void testEngine()
     DrivingState state;
 
     engine.power(true);
-    engine.instanceSpeed(10);
+    engine.speed(10);
     state = engine.calculate(state, 1);
     TestEqual("加速後の速度チェック", state.speed(), 10.0);
 }
@@ -93,19 +93,20 @@ void testCompositeDrivingStateCalculator()
 {
     std::cerr << " === CompositeDrivingStateCalculator" << std::endl;
 
-    Engine engine1;
-    Engine engine2;
+    Engine engine;
+    Brake brake;
     CompositeDrivingStateCalculator compositeDrivingStateCalculator;
     DrivingState state;
+    DrivingState res;
 
-    engine1.power(true);
-    engine2.power(true);
-    engine1.instanceSpeed(3);
-    engine2.instanceSpeed(3);
-    compositeDrivingStateCalculator.addFormula(engine1);
-    compositeDrivingStateCalculator.addFormula(engine2);
-    state = compositeDrivingStateCalculator.calculate(state, 1);
-    TestEqual("複数数式", state.speed(), 6);
+    engine.power(true);
+    engine.speed(3);
+    brake.force(2);
+    compositeDrivingStateCalculator.addFormula(engine);
+    compositeDrivingStateCalculator.addFormula(brake);
+    res = compositeDrivingStateCalculator.calculate(state, 1);
+    TestEqual("複数数式 speed", res.speed(), 1);
+    TestEqual("複数数式 angle", res.angle(), 0);
 }
 
 void testGear()
@@ -168,53 +169,54 @@ void testCar()
     Engine engine;
     Brake brake;
     SteerWheel steerWheel;
-    CompositeDrivingStateCalculator stateCalculator;
+    Transmission transmission;
+    Gear gear1(1);
+    Gear gear2(2);
+    Gear gearReverse;
 
-    stateCalculator.addFormula(engine);
-    stateCalculator.addFormula(brake);
-    stateCalculator.addFormula(steerWheel);
+    transmission.addGear(gear1);
+    transmission.addGear(gear2);
+    transmission.setReverse(gearReverse);
 
-    Car car(engine, brake, steerWheel);
-    car.update();
-    TestEqual("初期状態 speed", car.state().speed(), 0);
-    TestEqual("初期状態 angle", car.state().angle(), 0);
+    DrivingState res;
+    Car car(engine, brake, steerWheel, transmission);
+    res = car.calculate();
+    TestEqual("初期状態 speed", res.speed(), 0);
+    TestEqual("初期状態 angle", res.angle(), 0);
 
     car.start();
-    car.accelerate(3);
-    car.update();
-    TestEqual("started accelerate speed", car.state().speed(), 3);
-    TestEqual("started accelerate angle", car.state().angle(), 0);
+    car.accelerate(50);
+    res = car.calculate();
+    TestEqual("started accelerate speed", res.speed(), 50);
+    TestEqual("started accelerate angle", res.angle(), 0);
 
     car.stop();
-    car.accelerate(3);
-    car.update();
-    TestEqual("stopped accelerate speed", car.state().speed(), 3);
-    TestEqual("stopped accelerate angle", car.state().angle(), 0);
+    res = car.calculate();
+    TestEqual("stopped accelerate speed", res.speed(), 0);
+    TestEqual("stopped accelerate angle", res.angle(), 0);
 
     car.start();
     car.turn_wheel(10);
-    car.update();
-    TestEqual("1: turn_wheel speed", car.state().speed(), 3);
-    TestEqual("1: turn_wheel angle", car.state().angle(), 10);
+    res = car.calculate();
+    TestEqual("1: turn_wheel speed", res.speed(), 50);
+    TestEqual("1: turn_wheel angle", res.angle(), 10);
 
-    car.update();
-    TestEqual("2: turn_wheel speed", car.state().speed(), 3);
-    TestEqual("2: turn_wheel angle", car.state().angle(), 10);
+    res = car.calculate();
+    TestEqual("2: turn_wheel speed", res.speed(), 50);
+    TestEqual("2: turn_wheel angle", res.angle(), 10);
 
     car.straighten_wheels();
-    car.update();
-    TestEqual("straighten_wheels speed", car.state().speed(), 3);
-    TestEqual("straighten_wheels angle", car.state().angle(), 0);
+    res = car.calculate();
+    TestEqual("straighten_wheels speed", res.speed(), 50);
+    TestEqual("straighten_wheels angle", res.angle(), 0);
 
-    car.accelerate(50);
-    car.update(); // speed 53
     car.apply_force_on_brakes(2);
-    car.update();
-    TestEqual("apply_force_on_brakes speed", car.state().speed(), 51);
-    TestEqual("apply_force_on_brakes angle", car.state().angle(), 0);
+    res = car.calculate();
+    TestEqual("apply_force_on_brakes speed", res.speed(), 48);
+    TestEqual("apply_force_on_brakes angle", res.angle(), 0);
 
     car.apply_emergency_brakes();
-    car.update();
-    TestEqual("apply_emergency_brakes speed", car.state().speed(), 0);
-    TestEqual("apply_emergency_brakes angle", car.state().angle(), 0);
+    res = car.calculate();
+    TestEqual("apply_emergency_brakes speed", res.speed(), 0);
+    TestEqual("apply_emergency_brakes angle", res.angle(), 0);
 }

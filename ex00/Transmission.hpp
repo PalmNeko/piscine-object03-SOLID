@@ -6,7 +6,7 @@
 
 #include <vector>
 
-class Transmission : IDrivingStateCalculationFormula
+class Transmission : public IDrivingStateCalculationFormula
 {
     std::vector<Gear> gears;
     Gear reverse;
@@ -34,7 +34,7 @@ public:
     {
         if (gearNo < 0)
             return;
-        size_t UgearNo = static_cast<size_t>(gearNo);
+        std::size_t UgearNo = static_cast<std::size_t>(gearNo);
         if (UgearNo + 1 < gears.size())
             gearNo++;
         return;
@@ -64,7 +64,7 @@ public:
         reverse = gear;
     }
 
-private:
+public:
     Transmission &operator=(const Transmission &other)
     {
         if (this != &other)

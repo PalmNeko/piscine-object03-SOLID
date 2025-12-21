@@ -3,7 +3,7 @@
 #include "IDrivingStateCalculationFormula.hpp"
 #include "DrivingState.hpp"
 
-class Gear : IDrivingStateCalculationFormula
+class Gear : public IDrivingStateCalculationFormula
 {
     double speed_ratio_;
 

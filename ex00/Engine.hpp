@@ -4,28 +4,23 @@
 
 class Engine : public IDrivingStateCalculationFormula
 {
-    double instance_speed;
+    double speed_;
     bool power_;
 
 public:
-    Engine() : instance_speed(0), power_(false) {}
+    Engine() : speed_(0), power_(false) {}
     ~Engine() {}
-    Engine(const Engine &other) : instance_speed(other.instance_speed), power_(other.power_) {}
+    Engine(const Engine &other) : speed_(other.speed_), power_(other.power_) {}
 
 public:
-    void instanceSpeed(double value)
-    {
-        if (power_)
-            instance_speed = value;
-    }
+    void speed(double value) { speed_ = value; }
     void power(bool value) { power_ = value; }
 
     DrivingState calculate(const DrivingState &state, double)
     {
         if (power_ == false)
             return state;
-        DrivingState newstate(state.speed() + instance_speed, state.angle());
-        instance_speed = 0;
+        DrivingState newstate(speed_, state.angle());
         return newstate;
     }
 
@@ -34,7 +29,7 @@ public:
     {
         if (this != &other)
         {
-            instance_speed = other.instance_speed;
+            speed_ = other.speed_;
             power_ = other.power_;
         }
         return *this;
