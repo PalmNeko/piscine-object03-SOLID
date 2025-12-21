@@ -4,6 +4,8 @@
 #include "SteerWheel.hpp"
 #include "TestContext.hpp"
 #include "Brake.hpp"
+#include "Gear.hpp"
+#include "Transmission.hpp"
 #include "test.hpp"
 #include <string>
 #include <iostream>
@@ -21,6 +23,8 @@ void testEngine();
 void testBrake();
 void testSteerWheel();
 void testCompositeDrivingStateCalculator();
+void testGear();
+void testTransmission();
 void testCar();
 
 void test()
@@ -30,6 +34,8 @@ void test()
     testBrake();
     testSteerWheel();
     testCompositeDrivingStateCalculator();
+    testGear();
+    testTransmission();
     testCar();
 }
 
@@ -100,6 +106,59 @@ void testCompositeDrivingStateCalculator()
     compositeDrivingStateCalculator.addFormula(engine2);
     state = compositeDrivingStateCalculator.calculate(state, 1);
     TestEqual("複数数式", state.speed(), 6);
+}
+
+void testGear()
+{
+    std::cerr << " === Gear" << std::endl;
+
+    DrivingState state(3, 0);
+    Gear gear(2);
+
+    state = gear.calculate(state, 1);
+    TestEqual("ギアの力 speed", state.speed(), 6);
+    TestEqual("ギアの力 angle", state.angle(), 0);
+}
+
+void testTransmission()
+{
+    std::cerr << " === Transmission" << std::endl;
+
+    DrivingState state(3, 0);
+    DrivingState res;
+    Gear gear1(1);          // スピード変わらない
+    Gear gear2(2);          // スピード2倍
+    Gear gearReverse(-1.0); // スピード逆
+    Transmission transmission;
+
+    transmission.addGear(gear1);
+    transmission.addGear(gear2);
+    transmission.setReverse(gearReverse);
+    res = transmission.calculate(state, 1);
+    TestEqual("ギア1の力 speed", res.speed(), 3);
+    TestEqual("ギア1の力 angle", res.angle(), 0);
+
+    transmission.shiftup(); // エラー処理チェックのため２回行う
+    transmission.shiftup();
+    res = transmission.calculate(state, 1);
+    TestEqual("ギア2の力 speed", res.speed(), 6);
+    TestEqual("ギア2の力 angle", res.angle(), 0);
+
+    transmission.shiftdown(); // エラー処理チェックのため２回行う
+    transmission.shiftdown();
+    res = transmission.calculate(state, 1);
+    TestEqual("ギア1の力 speed", res.speed(), 3);
+    TestEqual("ギア1の力 angle", res.angle(), 0);
+
+    transmission.shiftReverse();
+    res = transmission.calculate(state, 1);
+    TestEqual("逆ギアの力 speed", res.speed(), -3);
+    TestEqual("逆ギアの力 angle", res.angle(), 0);
+
+    transmission.shiftReverse();
+    res = transmission.calculate(state, 1);
+    TestEqual("ギア1の力 speed", res.speed(), 3);
+    TestEqual("ギア1の力 angle", res.angle(), 0);
 }
 
 void testCar()

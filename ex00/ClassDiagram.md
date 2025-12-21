@@ -8,6 +8,9 @@ classDiagram
     IDrivingStateCalculationFormula <|.. Brake
     IDrivingStateCalculationFormula <|.. Engine
     IDrivingStateCalculationFormula <|.. SteerWheel
+    IDrivingStateCalculationFormula <|.. Gear
+    IDrivingStateCalculationFormula <|.. Transmission
+    Transmission <-- Gear
 
     class Car {
         -DrivingState state
