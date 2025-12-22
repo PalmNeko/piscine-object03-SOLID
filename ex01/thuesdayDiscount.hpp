@@ -4,22 +4,15 @@
 
 class ThuesdayDiscountCommand : public Command
 {
+protected:
     ThuesdayDiscountCommand() {}
+    ThuesdayDiscountCommand(const ThuesdayDiscountCommand &other)
+        : Command(other) {}
 
 public:
     ThuesdayDiscountCommand(std::size_t id, std::size_t date, std::size_t client, std::size_t articles)
         : Command(id, date, client, articles) {}
     ~ThuesdayDiscountCommand() {}
-    ThuesdayDiscountCommand(const ThuesdayDiscountCommand &other)
-        : Command(other) {}
-    ThuesdayDiscountCommand &operator=(ThuesdayDiscountCommand &other)
-    {
-        if (this != &other)
-        {
-            Command::operator=(other);
-        }
-        return *this;
-    }
 
     std::size_t get_total_price()
     {
@@ -34,5 +27,15 @@ private:
     bool isThuesday(std::size_t date)
     {
         return date % 7 == 2;
+    }
+
+protected:
+    ThuesdayDiscountCommand &operator=(ThuesdayDiscountCommand &other)
+    {
+        if (this != &other)
+        {
+            Command::operator=(other);
+        }
+        return *this;
     }
 };
